@@ -1,12 +1,16 @@
 package com.tpsoft.androidimei;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.TextView;
@@ -24,19 +28,25 @@ public class MainActivity extends AppCompatActivity {
         TextView textImei = findViewById(R.id.textImei);
         textImei.setText("Imie");
 
+        textImei.setText(getImei());
+
+    }
+
+
+    public String getImei() {
+        String imei = "";
         TelephonyManager telephonyManager = (TelephonyManager) getSystemService(this.TELEPHONY_SERVICE);
-
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-
-            System.out.println("IF xxxx ");
-
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_PHONE_STATE},
                     MY_PERMISSIONS_REQUEST_READ_PHONE_STATE);
-
         }
-
-        textImei.setText(telephonyManager.getDeviceId());
-
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            imei = Settings.Secure.getString(getBaseContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+        } else {
+            imei = telephonyManager.getDeviceId();
+            //imei = telephonyManager.getImei();
+        }
+        return imei;
     }
 
 }
